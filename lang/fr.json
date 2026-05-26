@@ -1,0 +1,12 @@
+{
+  "Already Confirmed": "Déjà confirmé",
+  "Your booking is already confirmed.": "Votre réservation est déjà confirmée.",
+  "Invalid Link": "Lien invalide",
+  "This confirmation link is invalid or already used.": "Ce lien de confirmation est invalide ou déjà utilisé.",
+  "Booking Cancelled": "Réservation annulée",
+  "Your booking has been cancelled.": "Votre réservation a été annulée.",
+  "Slot Unavailable": "Créneau indisponible",
+  "Another client confirmed this time slot before you. Please book another slot.": "Un autre client a confirmé ce créneau avant vous. Veuillez réserver un autre créneau.",
+  "Booking Confirmed": "Réservation confirmée",
+  "Your booking is now confirmed successfully.": "Votre réservation est maintenant confirmée avec succès."
+}

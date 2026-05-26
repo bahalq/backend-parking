@@ -1,0 +1,13 @@
+{
+    "Already Confirmed": "Already Confirmed",
+    "Your booking is already confirmed.": "Your booking is already confirmed.",
+    "Invalid Link": "Invalid Link",
+    "This confirmation link is invalid or already used.": "This confirmation link is invalid or already used.",
+    "Booking Cancelled" : "Booking Cancelled",
+    "Your booking has been cancelled.": "Your booking has been cancelled.",
+    "Slot Unavailable": "Slot Unavailable",
+    "Another client confirmed this time slot before you. Please book another slot.": "Another client confirmed this time slot before you. Please book another slot.",
+    "Booking Confirmed": "Booking Confirmed",
+    "Your booking is now confirmed successfully.": "Your booking is now confirmed successfully."
+
+}

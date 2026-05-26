@@ -1,0 +1,12 @@
+{
+  "Already Confirmed": "تم التأكيد مسبقًا",
+  "Your booking is already confirmed.": "تم تأكيد حجزك بالفعل.",
+  "Invalid Link": "رابط غير صالح",
+  "This confirmation link is invalid or already used.": "رابط التأكيد هذا غير صالح أو تم استخدامه مسبقًا.",
+  "Booking Cancelled": "تم إلغاء الحجز",
+  "Your booking has been cancelled.": "تم إلغاء حجزك.",
+  "Slot Unavailable": "الموعد غير متاح",
+  "Another client confirmed this time slot before you. Please book another slot.": "قام عميل آخر بتأكيد هذا الموعد قبلك. يرجى حجز موعد آخر.",
+  "Booking Confirmed": "تم تأكيد الحجز",
+  "Your booking is now confirmed successfully.": "تم تأكيد حجزك بنجاح."
+}
