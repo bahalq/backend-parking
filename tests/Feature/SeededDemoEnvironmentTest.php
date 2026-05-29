@@ -96,6 +96,11 @@ class SeededDemoEnvironmentTest extends TestCase
             ->assertJsonPath('success', true)
             ->assertJsonStructure(['available_slots']);
 
+        $this->getJson('/api/terrains/month-availability?terrain_id=' . $spot->id . '&year=' . now()->year . '&month=' . now()->month)
+            ->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonStructure(['availability', 'bookings_map', 'capacity_map']);
+
         $category = VehicleCategory::where('name', 'EV')->firstOrFail();
         $this->getJson('/api/terrains/by-activity?ground_id=' . $spot->parking_zone_id . '&activity_id=' . $category->id)
             ->assertOk()

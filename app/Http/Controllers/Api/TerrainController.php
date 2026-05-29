@@ -106,6 +106,7 @@ class TerrainController extends Controller
         ]);
 
         $spotId = $request->terrain_id;
+        $spot = ParkingSpot::findOrFail($spotId);
         $date = $request->date;
 
         $reservations = ParkingReservation::where('parking_spot_id', $spotId)
@@ -135,7 +136,7 @@ class TerrainController extends Controller
             ];
 
             // Frontend expects available_slots with time/display format
-            if (!$isBooked) {
+            if (!$isBooked && $spot->status !== 'Maintenance') {
                 $availableSlots[] = [
                     'time' => $start,
                     'display' => $start . ' - ' . $end,
@@ -160,6 +161,7 @@ class TerrainController extends Controller
         ]);
 
         $spotId = $request->terrain_id;
+        $spot = ParkingSpot::findOrFail($spotId);
 
         // Accept both combined 'month=2026-05' and separate 'year=2026&month=5' params
         if ($request->filled('year')) {
@@ -170,6 +172,8 @@ class TerrainController extends Controller
 
         $daysInMonth = Carbon::parse($monthStr)->daysInMonth;
         $availability = [];
+        $bookingsMap = [];
+        $capacityMap = array_fill(0, 7, $spot->status === 'Maintenance' ? 0 : 14);
 
         for ($day = 1; $day <= $daysInMonth; $day++) {
             $dateStr = sprintf('%s-%02d', $monthStr, $day);
@@ -191,12 +195,15 @@ class TerrainController extends Controller
             }
 
             // Total slots per day is 14 (from 8:00 to 22:00)
-            $availability[$dateStr] = $bookedSlotsCount < 14;
+            $bookingsMap[$dateStr] = $bookedSlotsCount;
+            $availability[$dateStr] = $bookedSlotsCount < 14 && $spot->status !== 'Maintenance';
         }
 
         return response()->json([
             'success' => true,
             'availability' => $availability,
+            'bookings_map' => $bookingsMap,
+            'capacity_map' => $capacityMap,
         ]);
     }
 
