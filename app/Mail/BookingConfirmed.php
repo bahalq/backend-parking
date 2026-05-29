@@ -17,14 +17,14 @@ class BookingConfirmed extends Mailable
     public function __construct(
         public Booking $booking,
         public string $verifyUrl,
-        public string $locale = 'fr',
+        public string $userLocale = 'fr',
     ) {
     }
 
     public function envelope(): Envelope
     {
         // Set locale for translation
-        app()->setLocale($this->locale);
+        app()->setLocale($this->userLocale);
 
         return new Envelope(
             subject: __('emails.booking_subject'),
@@ -36,7 +36,7 @@ class BookingConfirmed extends Mailable
         $this->booking->loadMissing(['terrain.ground', 'client']);
 
         $bookingDate = $this->booking->date
-            ? Carbon::parse($this->booking->date)->locale($this->locale)->translatedFormat('l d F Y')
+            ? Carbon::parse($this->booking->date)->locale($this->userLocale)->translatedFormat('l d F Y')
             : null;
 
         $qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . urlencode($this->verifyUrl);
@@ -52,8 +52,9 @@ class BookingConfirmed extends Mailable
                 'totalPrice' => $this->booking->total_price,
                 'reference' => $this->booking->reference,
                 'qrImageUrl' => $qrImageUrl,
-                'locale' => $this->locale,
+                'locale' => $this->userLocale,
             ],
         );
     }
 }
+

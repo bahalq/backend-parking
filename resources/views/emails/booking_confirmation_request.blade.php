@@ -7,8 +7,8 @@
 </head>
 <body style="margin:0;padding:24px;background-color:#f4f7fb;font-family:Arial,Helvetica,sans-serif;color:#1f2937;direction: {{ $locale === 'ar' ? 'rtl' : 'ltr' }};text-align: {{ $locale === 'ar' ? 'right' : 'left' }};">
     <div style="max-width:640px;margin:0 auto;background-color:#ffffff;border:1px solid #e5e7eb;border-radius:18px;overflow:hidden;">
-        <div style="background:linear-gradient(135deg,#065f46,#10b981);padding:28px 24px;color:#ffffff;">
-            <p style="margin:0 0 8px 0;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;opacity:0.9;">BookMyPitch</p>
+        <div style="background:linear-gradient(135deg,#0e1726,#0891b2);padding:28px 24px;color:#ffffff;">
+            <p style="margin:0 0 8px 0;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;opacity:0.9;">Parkova</p>
             <h1 style="margin:0;font-size:28px;line-height:1.2;">{{ __('emails.booking_confirmation_request_subject') }}</h1>
         </div>
 
@@ -43,15 +43,15 @@
                 </table>
             </div>
 
-            <div style="margin-top:20px;border:1px solid #d1fae5;border-radius:14px;padding:18px;background-color:#ecfdf5;">
-                <h2 style="margin:0 0 12px 0;font-size:17px;color:#065f46;">{{ __('emails.action_required') }}</h2>
-                <p style="margin:0 0 8px 0;font-size:14px;line-height:1.7;color:#065f46;">{{ __('emails.slot_pending') }}</p>
-                <p style="margin:0 0 12px 0;font-size:14px;line-height:1.7;color:#065f46;">{{ __('emails.enter_code') }}</p>
+            <div style="margin-top:20px;border:1px solid #cffafe;border-radius:14px;padding:18px;background-color:#ecfeff;">
+                <h2 style="margin:0 0 12px 0;font-size:17px;color:#0e7490;">{{ __('emails.action_required') }}</h2>
+                <p style="margin:0 0 8px 0;font-size:14px;line-height:1.7;color:#164e63;">{{ __('emails.slot_pending') }}</p>
+                <p style="margin:0 0 12px 0;font-size:14px;line-height:1.7;color:#164e63;">{{ __('emails.enter_code') }}</p>
                 <div style="text-align:center;margin:24px 0;">
 
                     <table align="center" cellpadding="0" cellspacing="0" style="margin:auto;">
                         <tr>
-                            <td style="background:#ecfdf5;border:2px dashed #10b981;border-radius:12px;padding:16px 24px;text-align:center;font-family:monospace;font-size:32px;font-weight:bold;color:#065f46;letter-spacing:8px;">
+                            <td style="background:#ecfeff;border:2px dashed #0891b2;border-radius:12px;padding:16px 24px;text-align:center;font-family:monospace;font-size:32px;font-weight:bold;color:#0e7490;letter-spacing:8px;">
                                 {{ $confirmationCode }}
                             </td>
                         </tr>

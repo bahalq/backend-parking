@@ -7,8 +7,8 @@
 </head>
 <body style="margin:0;padding:24px;background-color:#f4f7fb;font-family:Arial,Helvetica,sans-serif;color:#1f2937;direction: {{ $locale === 'ar' ? 'rtl' : 'ltr' }};text-align: {{ $locale === 'ar' ? 'right' : 'left' }};">
     <div style="max-width:640px;margin:0 auto;background-color:#ffffff;border:1px solid #e5e7eb;border-radius:18px;overflow:hidden;">
-        <div style="background:linear-gradient(135deg,#065f46,#10b981);padding:28px 24px;color:#ffffff;">
-            <p style="margin:0 0 8px 0;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;opacity:0.9;">BookMyPitch</p>
+        <div style="background:linear-gradient(135deg,#0e1726,#0891b2);padding:28px 24px;color:#ffffff;">
+            <p style="margin:0 0 8px 0;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;opacity:0.9;">Parkova</p>
             <h1 style="margin:0;font-size:28px;line-height:1.2;">{{ __('emails.booking_confirmed_msg') }}</h1>
         </div>
 
@@ -40,7 +40,7 @@
                     </tr>
                     <tr>
                         <td style="padding:10px 0;border-bottom:1px solid #e5e7eb;color:#6b7280;">{{ __('emails.price') }}</td>
-                        <td style="padding:10px 0;border-bottom:1px solid #e5e7eb;font-weight:700;color:#047857;">{{ e($totalPrice) }} DH</td>
+                        <td style="padding:10px 0;border-bottom:1px solid #e5e7eb;font-weight:700;color:#0891b2;">{{ e($totalPrice) }} DH</td>
                     </tr>
                     <tr>
                         <td style="padding:10px 0;color:#6b7280;">{{ __('emails.confirmation_code') }}</td>
@@ -65,12 +65,12 @@
                 </p>
             </div>
 
-            <div style="margin-top:20px;border:1px solid #d1fae5;border-radius:14px;padding:18px;background-color:#ecfdf5;">
-                <h2 style="margin:0 0 12px 0;font-size:17px;color:#065f46;">{{ __('emails.how_it_works') }}</h2>
-                <p style="margin:0 0 8px 0;font-size:14px;line-height:1.7;color:#065f46;">{{ __('emails.present_email') }}</p>
-                <p style="margin:0 0 8px 0;font-size:14px;line-height:1.7;color:#065f46;">{{ __('emails.staff_scan_qr') }}</p>
-                <p style="margin:0 0 8px 0;font-size:14px;line-height:1.7;color:#065f46;">{{ __('emails.reference_sufficient') }}</p>
-                <p style="margin:0;font-size:14px;line-height:1.7;color:#065f46;">{{ __('emails.arrive_early') }}</p>
+            <div style="margin-top:20px;border:1px solid #cffafe;border-radius:14px;padding:18px;background-color:#ecfeff;">
+                <h2 style="margin:0 0 12px 0;font-size:17px;color:#0e7490;">{{ __('emails.how_it_works') }}</h2>
+                <p style="margin:0 0 8px 0;font-size:14px;line-height:1.7;color:#164e63;">{{ __('emails.present_email') }}</p>
+                <p style="margin:0 0 8px 0;font-size:14px;line-height:1.7;color:#164e63;">{{ __('emails.staff_scan_qr') }}</p>
+                <p style="margin:0 0 8px 0;font-size:14px;line-height:1.7;color:#164e63;">{{ __('emails.reference_sufficient') }}</p>
+                <p style="margin:0;font-size:14px;line-height:1.7;color:#164e63;">{{ __('emails.arrive_early') }}</p>
             </div>
         </div>
 

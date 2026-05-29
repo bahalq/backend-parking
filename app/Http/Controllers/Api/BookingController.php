@@ -7,7 +7,10 @@ use App\Models\ParkingReservation;
 use App\Models\Driver;
 use App\Models\ParkingSpot;
 use App\Models\ParkingZone;
+use App\Mail\ReservationConfirmationRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
@@ -110,6 +113,39 @@ class BookingController extends Controller
 
         // Temporarily change spot status to Reserved
         $spot->update(['status' => 'Reserved']);
+
+        // Send verification code email to the driver
+        if ($email) {
+            try {
+                $locale = $request->header('Accept-Language', 'en');
+                $locale = in_array($locale, ['en', 'fr', 'ar']) ? $locale : 'en';
+
+                Mail::to($email)->send(new ReservationConfirmationRequest($reservation, $locale));
+
+                Log::info('Mail dispatched', [
+                    'context' => 'reservation_confirmation_request',
+                    'recipient' => $email,
+                    'mailer' => config('mail.default'),
+                    'queued' => false,
+                    'meta' => [
+                        'reservation_id' => $reservation->id,
+                        'reference' => $reservation->reference,
+                    ],
+                ]);
+            } catch (\Throwable $e) {
+                Log::error('Mail delivery failed', [
+                    'context' => 'reservation_confirmation_request',
+                    'recipient' => $email,
+                    'mailer' => config('mail.default'),
+                    'queued' => false,
+                    'error' => $e->getMessage(),
+                    'meta' => [
+                        'reservation_id' => $reservation->id,
+                        'reference' => $reservation->reference,
+                    ],
+                ]);
+            }
+        }
 
         return response()->json([
             'success' => true,
