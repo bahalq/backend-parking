@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ParkingReservation extends Model
 {
+    use HasFactory;
+
     protected $table = 'parking_reservations';
 
     protected $fillable = [

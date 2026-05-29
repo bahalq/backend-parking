@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class TrafficAnalytic extends Model
 {
+    use HasFactory;
+
     protected $table = 'traffic_analytics';
 
     protected $fillable = [

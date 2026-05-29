@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ParkingZone;
 use App\Models\ParkingZoneImage;
 use App\Models\VehicleCategory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
@@ -17,7 +18,7 @@ class GroundController extends Controller
      */
     public function index(Request $request)
     {
-        $zones = ParkingZone::with(['images', 'spots'])
+        $zones = ParkingZone::with(['images', 'spots.vehicleCategory'])
             ->orderBy('name')
             ->paginate(10);
 
@@ -42,6 +43,8 @@ class GroundController extends Controller
                     'id' => $img->id,
                     'image' => $img->image,
                 ]),
+                'activities' => $this->mapZoneCategories($zone->spots),
+                'terrains' => $this->mapZoneSpots($zone->spots),
             ];
         });
 
@@ -84,6 +87,8 @@ class GroundController extends Controller
                 'id' => $img->id,
                 'image' => $img->image,
             ]),
+            'activities' => $this->mapZoneCategories($zone->spots),
+            'terrains' => $this->mapZoneSpots($zone->spots),
         ];
 
         return response()->json([
@@ -97,13 +102,17 @@ class GroundController extends Controller
      */
     public function activities()
     {
-        $categories = VehicleCategory::orderBy('name')->get();
+        $categories = VehicleCategory::withCount('parkingSpots')
+            ->whereHas('parkingSpots')
+            ->orderBy('name')
+            ->get();
 
         // Map categories for activities-compatible format in React frontend
         $activities = $categories->map(fn($cat) => [
             'id' => $cat->id,
             'name' => $cat->name,
             'icon' => $cat->icon,
+            'spots_count' => $cat->parking_spots_count,
         ]);
 
         return response()->json([
@@ -182,5 +191,43 @@ class GroundController extends Controller
             'success' => true,
             'message' => 'Parking Zone deleted successfully.',
         ]);
+    }
+
+    private function mapZoneCategories(Collection $spots)
+    {
+        return $spots
+            ->filter(fn($spot) => $spot->vehicleCategory !== null)
+            ->groupBy('vehicle_category_id')
+            ->map(function ($categorySpots) {
+                $category = $categorySpots->first()->vehicleCategory;
+
+                return [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'icon' => $category->icon,
+                    'spots_count' => $categorySpots->count(),
+                    'available_spots_count' => $categorySpots
+                        ->whereNotIn('status', ['Occupied', 'Reserved', 'Maintenance'])
+                        ->count(),
+                    'min_price_per_hour' => (float) $categorySpots->min('price_per_hour'),
+                ];
+            })
+            ->sortBy('name')
+            ->values();
+    }
+
+    private function mapZoneSpots(Collection $spots)
+    {
+        return $spots->map(fn($spot) => [
+            'id' => $spot->id,
+            'ground_id' => $spot->parking_zone_id,
+            'activity_id' => $spot->vehicle_category_id,
+            'activity_name' => $spot->vehicleCategory?->name,
+            'activity_icon' => $spot->vehicleCategory?->icon,
+            'name' => $spot->name,
+            'type' => $spot->type,
+            'status' => $spot->status,
+            'price_per_hour' => (float) $spot->price_per_hour,
+        ])->values();
     }
 }

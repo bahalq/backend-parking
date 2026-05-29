@@ -2,25 +2,26 @@
 
 namespace Database\Seeders;
 
+use App\Models\VehicleCategory;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class ActivitySeeder extends Seeder
 {
     public function run(): void
     {
         $categories = [
-            ['name' => 'Compact',       'icon' => '🚗'],
-            ['name' => 'Sedan',         'icon' => '🚙'],
-            ['name' => 'SUV',           'icon' => '🚐'],
-            ['name' => 'EV Charging',   'icon' => '⚡'],
-            ['name' => 'Motorcycle',    'icon' => '🏍️'],
+            ['name' => 'Compact', 'icon' => 'car'],
+            ['name' => 'Sedan', 'icon' => 'sedan'],
+            ['name' => 'SUV', 'icon' => 'suv'],
+            ['name' => 'EV', 'icon' => 'ev'],
+            ['name' => 'Motorcycle', 'icon' => 'moto'],
+            ['name' => 'Accessible', 'icon' => 'access'],
         ];
 
-        foreach ($categories as $cat) {
-            DB::table('vehicle_categories')->updateOrInsert(
-                ['name' => $cat['name']],
-                $cat
+        foreach ($categories as $category) {
+            VehicleCategory::updateOrCreate(
+                ['name' => $category['name']],
+                $category
             );
         }
     }

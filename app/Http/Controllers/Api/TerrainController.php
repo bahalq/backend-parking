@@ -20,8 +20,12 @@ class TerrainController extends Controller
         $query = ParkingSpot::with(['parkingZone', 'vehicleCategory']);
 
         // Staff are limited to their assigned zone
-        if ($user->role === 'Staff' && $user->parking_zone_id) {
+        if ($user && $user->role === 'Staff' && $user->parking_zone_id) {
             $query->where('parking_zone_id', $user->parking_zone_id);
+        }
+
+        if ($request->filled('ground_id')) {
+            $query->where('parking_zone_id', $request->ground_id);
         }
 
         $spots = $query->orderBy('name')->paginate(15);
@@ -66,6 +70,8 @@ class TerrainController extends Controller
 
         $spots = ParkingSpot::where('parking_zone_id', $request->ground_id)
             ->where('vehicle_category_id', $request->activity_id)
+            ->where('status', '!=', 'Maintenance')
+            ->with('vehicleCategory')
             ->get();
 
         $terrains = $spots->map(fn($spot) => [
@@ -75,7 +81,12 @@ class TerrainController extends Controller
             'name' => $spot->name,
             'type' => $spot->type,
             'status' => $spot->status,
-            'price_per_hour' => $spot->price_per_hour,
+            'price_per_hour' => (float) $spot->price_per_hour,
+            'activity' => $spot->vehicleCategory ? [
+                'id' => $spot->vehicleCategory->id,
+                'name' => $spot->vehicleCategory->name,
+                'icon' => $spot->vehicleCategory->icon,
+            ] : null,
         ]);
 
         return response()->json([

@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ParkingZone extends Model
 {
+    use HasFactory;
+
     protected $table = 'parking_zones';
 
     protected $fillable = [
@@ -38,6 +41,13 @@ class ParkingZone extends Model
     public function spots()
     {
         return $this->hasMany(ParkingSpot::class, 'parking_zone_id');
+    }
+
+    public function vehicleCategories()
+    {
+        return $this->belongsToMany(VehicleCategory::class, 'parking_spots', 'parking_zone_id', 'vehicle_category_id')
+            ->withPivot(['id', 'name', 'type', 'status', 'price_per_hour'])
+            ->distinct();
     }
 
     // Helper relation for terrains mapping

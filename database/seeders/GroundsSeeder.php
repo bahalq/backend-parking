@@ -2,95 +2,155 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
+use App\Models\ParkingSpot;
 use App\Models\ParkingZone;
 use App\Models\ParkingZoneImage;
-use App\Models\ParkingSpot;
-use App\Models\VehicleCategory;
 use App\Models\User;
+use App\Models\VehicleCategory;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class GroundsSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::where('email', 'admin@booking.com')->first() 
-              ?? User::where('role', 'Admin')->first();
-        $adminId = $admin ? $admin->id : 1;
-
-        $compact = VehicleCategory::where('name', 'Compact')->first();
-        $sedan = VehicleCategory::where('name', 'Sedan')->first();
-        $suv = VehicleCategory::where('name', 'SUV')->first();
-        $ev = VehicleCategory::where('name', 'EV Charging')->first();
-        $moto = VehicleCategory::where('name', 'Motorcycle')->first();
-
-        $compactId = $compact ? $compact->id : null;
-        $sedanId = $sedan ? $sedan->id : null;
-        $suvId = $suv ? $suv->id : null;
-        $evId = $ev ? $ev->id : null;
-        $motoId = $moto ? $moto->id : null;
-
-        $parkingZones = [
+        $admin = User::firstOrCreate(
+            ['email' => 'superadmin@smartparking.ma'],
             [
-                "name" => "Casablanca Central Plaza Parking",
-                "city" => "Casablanca",
-                "address" => "12 Boulevard Mohamed V, Casablanca",
-                "description" => "Premium downtown parking garage with dynamic spaces, secure CCTV surveillance, and fast EV charging bays.",
-                "latitude" => 33.5731104,
-                "longitude" => -7.5898434,
-                "image" => "elite.jpg",
-                "spots" => [
-                    ["name" => "Spot A-01", "type" => "Standard", "category_id" => $compactId, "price" => 15],
-                    ["name" => "Spot A-02", "type" => "Standard", "category_id" => $compactId, "price" => 15],
-                    ["name" => "Spot B-01", "type" => "Standard", "category_id" => $sedanId, "price" => 20],
-                    ["name" => "Spot EV-01", "type" => "EV Charger", "category_id" => $evId, "price" => 30],
-                    ["name" => "Spot M-01", "type" => "Motorcycle Only", "category_id" => $motoId, "price" => 10],
+                'first_name' => 'Yassine',
+                'last_name' => 'El Mansouri',
+                'password' => Hash::make('Admin@123'),
+                'phone' => '+212522440100',
+                'cin' => 'BE123456',
+                'role' => 'Admin',
+            ]
+        );
+
+        $categoryIds = VehicleCategory::pluck('id', 'name');
+
+        $zones = [
+            [
+                'code' => 'CAS',
+                'name' => 'Casablanca Marina Smart Parking',
+                'city' => 'Casablanca',
+                'address' => 'Boulevard Sidi Mohamed Ben Abdellah, Casablanca',
+                'description' => 'Secure waterfront parking near Casa Port, Marina Mall, and the business district with EV charging and accessible bays.',
+                'latitude' => 33.602102,
+                'longitude' => -7.617719,
+                'image' => 'casablanca-marina.jpg',
+                'staff' => [
+                    ['first_name' => 'Salma', 'last_name' => 'Alaoui', 'email' => 'salma.alaoui@smartparking.ma', 'phone' => '+212661120101', 'cin' => 'BK445210'],
+                    ['first_name' => 'Hamza', 'last_name' => 'Bennani', 'email' => 'hamza.bennani@smartparking.ma', 'phone' => '+212662230202', 'cin' => 'BE778421'],
                 ],
+                'counts' => ['Compact' => 5, 'Sedan' => 8, 'SUV' => 3, 'EV' => 3, 'Motorcycle' => 2, 'Accessible' => 2],
+                'base_price' => 14,
             ],
             [
-                "name" => "Rabat Station Parking lot",
-                "city" => "Rabat",
-                "address" => "Avenue de France, Rabat",
-                "description" => "Convenient public parking located adjacent to the Rabat Ville railway station. Features automated ticketing and security patrol.",
-                "latitude" => 34.020882,
-                "longitude" => -6.841650,
-                "image" => "green.jpg",
-                "spots" => [
-                    ["name" => "Spot A-01", "type" => "Standard", "category_id" => $compactId, "price" => 12],
-                    ["name" => "Spot C-01", "type" => "Large SUV Spot", "category_id" => $suvId, "price" => 25],
-                    ["name" => "Spot EV-02", "type" => "EV Charger", "category_id" => $evId, "price" => 28],
+                'code' => 'RAB',
+                'name' => 'Rabat Agdal Station Parking',
+                'city' => 'Rabat',
+                'address' => 'Avenue Hassan II, Agdal, Rabat',
+                'description' => 'High-turnover station parking for commuters, university visitors, and taxis with clear wayfinding and staffed entry gates.',
+                'latitude' => 33.999219,
+                'longitude' => -6.849787,
+                'image' => 'rabat-agdal.jpg',
+                'staff' => [
+                    ['first_name' => 'Nawal', 'last_name' => 'Tazi', 'email' => 'nawal.tazi@smartparking.ma', 'phone' => '+212663340303', 'cin' => 'AD335908'],
                 ],
+                'counts' => ['Compact' => 6, 'Sedan' => 7, 'SUV' => 2, 'EV' => 2, 'Motorcycle' => 3, 'Accessible' => 2],
+                'base_price' => 11,
+            ],
+            [
+                'code' => 'MRK',
+                'name' => 'Marrakech Gueliz City Hub',
+                'city' => 'Marrakech',
+                'address' => 'Avenue Mohammed V, Gueliz, Marrakech',
+                'description' => 'Central Gueliz parking close to shops and hotels, optimized for tourist traffic, short stays, and evening peak demand.',
+                'latitude' => 31.634236,
+                'longitude' => -8.010057,
+                'image' => 'marrakech-gueliz.jpg',
+                'staff' => [
+                    ['first_name' => 'Ayoub', 'last_name' => 'Skalli', 'email' => 'ayoub.skalli@smartparking.ma', 'phone' => '+212664450404', 'cin' => 'EE901245'],
+                ],
+                'counts' => ['Compact' => 4, 'Sedan' => 8, 'SUV' => 4, 'EV' => 2, 'Motorcycle' => 2, 'Accessible' => 2],
+                'base_price' => 13,
             ],
         ];
 
-        foreach ($parkingZones as $z) {
+        foreach ($zones as $zoneData) {
             $zone = ParkingZone::create([
-                'id_admin' => $adminId,
-                'name' => $z['name'],
-                'city' => $z['city'],
-                'address' => $z['address'],
-                'description' => $z['description'],
-                'latitude' => $z['latitude'],
-                'longitude' => $z['longitude'],
-                'total_spots' => count($z['spots']),
+                'id_admin' => $admin->id,
+                'name' => $zoneData['name'],
+                'city' => $zoneData['city'],
+                'address' => $zoneData['address'],
+                'description' => $zoneData['description'],
+                'latitude' => $zoneData['latitude'],
+                'longitude' => $zoneData['longitude'],
+                'total_spots' => array_sum($zoneData['counts']),
             ]);
 
-            if (!empty($z['image'])) {
-                ParkingZoneImage::create([
+            ParkingZoneImage::create([
+                'parking_zone_id' => $zone->id,
+                'image' => $zoneData['image'],
+            ]);
+
+            foreach ($zoneData['staff'] as $staff) {
+                User::create([
+                    ...$staff,
+                    'password' => Hash::make('Staff@123'),
+                    'role' => 'Staff',
                     'parking_zone_id' => $zone->id,
-                    'image' => $z['image'],
                 ]);
             }
 
-            foreach ($z['spots'] as $s) {
-                ParkingSpot::create([
-                    'parking_zone_id' => $zone->id,
-                    'vehicle_category_id' => $s['category_id'],
-                    'name' => $s['name'],
-                    'type' => $s['type'],
-                    'status' => 'Available',
-                    'price_per_hour' => $s['price'],
-                ]);
+            $sequence = 1;
+            foreach ($zoneData['counts'] as $category => $count) {
+                for ($i = 1; $i <= $count; $i++) {
+                    ParkingSpot::create([
+                        'parking_zone_id' => $zone->id,
+                        'vehicle_category_id' => $categoryIds[$category],
+                        'name' => sprintf('%s-%02d', $zoneData['code'], $sequence),
+                        'type' => $this->spotType($category),
+                        'status' => $this->spotStatus($sequence),
+                        'price_per_hour' => $this->priceFor($category, $zoneData['base_price']),
+                    ]);
+
+                    $sequence++;
+                }
             }
         }
+    }
+
+    private function spotType(string $category): string
+    {
+        return match ($category) {
+            'EV' => 'EV Charging',
+            'Accessible' => 'Accessible',
+            'Motorcycle' => 'Motorcycle',
+            'SUV' => 'Large Vehicle',
+            default => 'Standard',
+        };
+    }
+
+    private function priceFor(string $category, int $basePrice): int
+    {
+        return match ($category) {
+            'EV' => $basePrice + 14,
+            'Accessible' => $basePrice,
+            'Motorcycle' => max(6, $basePrice - 5),
+            'SUV' => $basePrice + 7,
+            'Sedan' => $basePrice + 3,
+            default => $basePrice,
+        };
+    }
+
+    private function spotStatus(int $sequence): string
+    {
+        return match (true) {
+            $sequence % 17 === 0 => 'Maintenance',
+            $sequence % 11 === 0 => 'Occupied',
+            $sequence % 7 === 0 => 'Reserved',
+            default => 'Available',
+        };
     }
 }

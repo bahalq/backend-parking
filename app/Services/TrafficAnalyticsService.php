@@ -18,10 +18,13 @@ class TrafficAnalyticsService
     {
         $today = Carbon::today();
         
+        $hourStart = $today->copy()->setTime($hour, 0);
+        $hourEnd = $hourStart->copy()->addHour();
+
         // Count entries in this hour today
         $vehicleCount = OccupancyLog::where('parking_zone_id', $zoneId)
-            ->whereDate('timestamp', $today)
-            ->whereRaw("strftime('%H', timestamp) = ?", [sprintf('%02d', $hour)])
+            ->where('timestamp', '>=', $hourStart)
+            ->where('timestamp', '<', $hourEnd)
             ->where('action', 'Entry')
             ->count();
 
