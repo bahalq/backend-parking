@@ -7,6 +7,7 @@ use App\Models\ParkingReservation;
 use App\Models\Driver;
 use App\Models\ParkingSpot;
 use App\Models\ParkingZone;
+use App\Mail\BookingConfirmed;
 use App\Mail\ReservationConfirmationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -225,6 +226,37 @@ class BookingController extends Controller
         }
 
         $reservation->update(['status' => 'Confirmed']);
+        $reservation->loadMissing(['parkingSpot.parkingZone', 'driver']);
+
+        // Send confirmation email with QR code
+        $driverEmail = $reservation->driver?->email;
+        if ($driverEmail) {
+            try {
+                $locale = $request->header('Accept-Language', 'en');
+                $locale = in_array($locale, ['en', 'fr', 'ar']) ? $locale : 'en';
+
+                $verifyUrl = config('app.url') . '/api/bookings/verify/' . $reservation->reference;
+
+                // Re-use the BookingConfirmed mailable (it expects a Booking model,
+                // but we adapt by passing the reservation as a dynamic wrapper)
+                Mail::to($driverEmail)->send(
+                    new BookingConfirmed($reservation, $verifyUrl, $locale)
+                );
+
+                Log::info('Confirmation email dispatched', [
+                    'context' => 'booking_confirmed',
+                    'recipient' => $driverEmail,
+                    'reservation_id' => $reservation->id,
+                ]);
+            } catch (\Throwable $e) {
+                Log::error('Confirmation email failed', [
+                    'context' => 'booking_confirmed',
+                    'recipient' => $driverEmail,
+                    'error' => $e->getMessage(),
+                    'reservation_id' => $reservation->id,
+                ]);
+            }
+        }
 
         return response()->json([
             'success' => true,
@@ -233,14 +265,16 @@ class BookingController extends Controller
     }
 
     /**
-     * Public API: Simulate resending the verification code.
+     * Public API: Resend the verification code via email.
      */
     public function resendCode(Request $request)
     {
         // Accept both 'reference' and 'token' field names
         $reference = $request->input('reference', $request->input('token'));
 
-        $reservation = ParkingReservation::where('reference', $reference)->first();
+        $reservation = ParkingReservation::with(['parkingSpot.parkingZone', 'driver'])
+            ->where('reference', $reference)
+            ->first();
 
         if (!$reservation) {
             return response()->json([
@@ -249,10 +283,57 @@ class BookingController extends Controller
             ], 404);
         }
 
+        if ($reservation->status === 'Confirmed' || $reservation->status === 'Completed') {
+            return response()->json([
+                'success' => false,
+                'message' => 'This reservation is already confirmed.',
+            ], 422);
+        }
+
+        // Generate a fresh verification code
+        $newCode = sprintf('%06d', mt_rand(100000, 999999));
+        $reservation->update(['verification_code' => $newCode]);
+
+        // Send the email
+        $driverEmail = $reservation->driver?->email;
+        if ($driverEmail) {
+            try {
+                $locale = $request->header('Accept-Language', 'en');
+                $locale = in_array($locale, ['en', 'fr', 'ar']) ? $locale : 'en';
+
+                Mail::to($driverEmail)->send(
+                    new ReservationConfirmationRequest($reservation, $locale)
+                );
+
+                Log::info('Verification code resent', [
+                    'context' => 'resend_verification_code',
+                    'recipient' => $driverEmail,
+                    'reservation_id' => $reservation->id,
+                    'new_code' => $newCode,
+                ]);
+            } catch (\Throwable $e) {
+                Log::error('Resend verification email failed', [
+                    'context' => 'resend_verification_code',
+                    'recipient' => $driverEmail,
+                    'error' => $e->getMessage(),
+                    'reservation_id' => $reservation->id,
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to resend verification email. Please try again.',
+                ], 500);
+            }
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'No email address on file for this reservation.',
+            ], 422);
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Verification code resent successfully.',
-            'code' => $reservation->verification_code, // return for easy client-side demo
         ]);
     }
 
@@ -312,12 +393,57 @@ class BookingController extends Controller
      */
     public function cancel(Request $request, $id)
     {
-        $reservation = ParkingReservation::findOrFail($id);
+        $reservation = ParkingReservation::with(['parkingSpot.parkingZone', 'driver'])->findOrFail($id);
         $reservation->update(['status' => 'Cancelled']);
 
         $spot = $reservation->parkingSpot;
         if ($spot && $spot->status === 'Reserved') {
             $spot->update(['status' => 'Available']);
+        }
+
+        // Send cancellation notification email
+        $driverEmail = $reservation->driver?->email;
+        if ($driverEmail) {
+            try {
+                $locale = $request->header('Accept-Language', 'en');
+                $locale = in_array($locale, ['en', 'fr', 'ar']) ? $locale : 'en';
+
+                $spotName = $reservation->parkingSpot?->name ?? 'Spot';
+                $zoneName = $reservation->parkingSpot?->parkingZone?->name ?? 'Zone';
+                $driverName = trim(
+                    ($reservation->driver?->first_name ?? '') . ' ' .
+                    ($reservation->driver?->last_name ?? '')
+                ) ?: 'Driver';
+
+                Mail::raw(
+                    "Dear {$driverName},\n\n" .
+                    "Your parking reservation (Ref: {$reservation->reference}) has been cancelled.\n\n" .
+                    "Details:\n" .
+                    "- Zone: {$zoneName}\n" .
+                    "- Spot: {$spotName}\n" .
+                    "- Date: {$reservation->date}\n" .
+                    "- Time: " . substr((string) $reservation->start_time, 0, 5) . " - " . substr((string) $reservation->end_time, 0, 5) . "\n\n" .
+                    "If you did not request this cancellation, please contact support.\n\n" .
+                    "— Parkova Team",
+                    function ($message) use ($driverEmail) {
+                        $message->to($driverEmail)
+                            ->subject('Reservation Cancelled — Parkova');
+                    }
+                );
+
+                Log::info('Cancellation email sent', [
+                    'context' => 'booking_cancelled',
+                    'recipient' => $driverEmail,
+                    'reservation_id' => $reservation->id,
+                ]);
+            } catch (\Throwable $e) {
+                Log::error('Cancellation email failed', [
+                    'context' => 'booking_cancelled',
+                    'recipient' => $driverEmail,
+                    'error' => $e->getMessage(),
+                    'reservation_id' => $reservation->id,
+                ]);
+            }
         }
 
         return response()->json([

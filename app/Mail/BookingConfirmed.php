@@ -2,7 +2,7 @@
 
 namespace App\Mail;
 
-use App\Models\Booking;
+use App\Models\ParkingReservation;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -15,15 +15,14 @@ class BookingConfirmed extends Mailable
     use Queueable, SerializesModels;
 
     public function __construct(
-        public Booking $booking,
+        public ParkingReservation $booking,
         public string $verifyUrl,
-        public string $userLocale = 'fr',
+        public string $userLocale = 'en',
     ) {
     }
 
     public function envelope(): Envelope
     {
-        // Set locale for translation
         app()->setLocale($this->userLocale);
 
         return new Envelope(
@@ -33,7 +32,7 @@ class BookingConfirmed extends Mailable
 
     public function content(): Content
     {
-        $this->booking->loadMissing(['terrain.ground', 'client']);
+        $this->booking->loadMissing(['parkingSpot.parkingZone', 'driver']);
 
         $bookingDate = $this->booking->date
             ? Carbon::parse($this->booking->date)->locale($this->userLocale)->translatedFormat('l d F Y')
@@ -44,9 +43,12 @@ class BookingConfirmed extends Mailable
         return new Content(
             view: 'emails.booking_confirmed',
             with: [
-                'clientName' => trim(($this->booking->client?->first_name ?? '') . ' ' . ($this->booking->client?->last_name ?? '')) ?: 'Client',
-                'groundName' => $this->booking->terrain?->ground?->name ?? 'Terrain',
-                'terrainName' => $this->booking->terrain?->name ?? 'Pitch',
+                'clientName' => trim(
+                    ($this->booking->driver?->first_name ?? '') . ' ' .
+                    ($this->booking->driver?->last_name ?? '')
+                ) ?: 'Driver',
+                'groundName' => $this->booking->parkingSpot?->parkingZone?->name ?? 'Parking Zone',
+                'terrainName' => $this->booking->parkingSpot?->name ?? 'Spot',
                 'bookingDate' => $bookingDate ?? $this->booking->date,
                 'timeSlot' => substr((string) $this->booking->start_time, 0, 5) . ' - ' . substr((string) $this->booking->end_time, 0, 5),
                 'totalPrice' => $this->booking->total_price,
@@ -57,4 +59,3 @@ class BookingConfirmed extends Mailable
         );
     }
 }
-
