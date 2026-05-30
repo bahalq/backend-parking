@@ -9,7 +9,7 @@ return [
     'allowed_origins' => [
         'https://bahalq.github.io',
         'http://localhost:5173',
-        'https://bookmypitch-d9fcfzgvfrg8grf2.spaincentral-01.azurewebsites.net',
+        'https://parkova-h9b8gtayfwa3cpej.spaincentral-01.azurewebsites.net',
     ],
 
     'allowed_origins_patterns' => [],
