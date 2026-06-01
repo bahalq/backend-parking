@@ -612,7 +612,7 @@ class BookingController extends Controller
         $user = $request->user();
         $zoneId = $user->parking_zone_id;
 
-        $reservation = ParkingReservation::with(['parkingSpot', 'driver'])
+        $reservation = ParkingReservation::with(['parkingSpot.parkingZone', 'parkingSpot.vehicleCategory', 'driver'])
             ->where('reference', $request->reference)
             ->first();
 
@@ -648,10 +648,20 @@ class BookingController extends Controller
             'booking' => [
                 'id' => $reservation->id,
                 'reference' => $reservation->reference,
+                'date' => $reservation->date,
+                'start_time' => $reservation->start_time,
+                'end_time' => $reservation->end_time,
+                'total_price' => $reservation->total_price,
                 'status' => $reservation->status,
                 'confirmed_at' => $reservation->confirmed_at,
+                'ground_name' => $reservation->parkingSpot->parkingZone?->name,
                 'terrain_name' => $reservation->parkingSpot->name,
+                'activity_name' => $reservation->parkingSpot->vehicleCategory?->name,
+                'first_name' => $reservation->driver->first_name,
+                'last_name' => $reservation->driver->last_name,
                 'client_name' => $reservation->driver->first_name . ' ' . $reservation->driver->last_name,
+                'email' => $reservation->driver->email,
+                'phone' => $reservation->driver->phone,
                 'license_plate' => $reservation->driver->license_plate,
             ],
         ]);
