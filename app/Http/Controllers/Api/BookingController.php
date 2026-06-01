@@ -606,14 +606,24 @@ class BookingController extends Controller
     public function staffVerify(Request $request)
     {
         $request->validate([
-            'reference' => 'required|string',
+            'reference' => 'nullable|string',
+            'token' => 'nullable|string',
         ]);
+
+        $reference = $request->input('reference', $request->input('token'));
+
+        if (!$reference) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ticket reference is required.',
+            ], 422);
+        }
 
         $user = $request->user();
         $zoneId = $user->parking_zone_id;
 
         $reservation = ParkingReservation::with(['parkingSpot.parkingZone', 'parkingSpot.vehicleCategory', 'driver'])
-            ->where('reference', $request->reference)
+            ->where('reference', strtoupper($reference))
             ->first();
 
         if (!$reservation) {
